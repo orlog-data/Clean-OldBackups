@@ -5,15 +5,16 @@ $file_suffix = '*.adi', '*.bak', '*.vhd'
 Set-Location -Path $PSScriptRoot
 
 function Get-AllBackups {
-    $file_list = Get-ChildItem $file_suffix -File
+    Param($FileSuffix)
+    $file_list = Get-ChildItem $FileSuffix -File
     Write-Host "All backups:"
     $file_list  | Format-Table | Out-String | Write-Host
     Return $file_list
 }
 
 function Find-LastFullBackup {
-    Param($FileList)
-    $last_full_backup = ($FileList | Where-Object Length -gt $size_limit | Sort-Object LastWriteTime | Select-Object -Last 1)
+    Param($FileList,$SizeLimit)
+    $last_full_backup = ($FileList | Where-Object Length -gt $SizeLimit | Sort-Object LastWriteTime | Select-Object -Last 1)
     Write-Host "Last full backup:"
     $last_full_backup | Format-Table | Out-String | Write-Host
     Return $last_full_backup
@@ -27,6 +28,6 @@ function Remove-OldBackups {
     $old_backups | Remove-Item
 }
 
-$file_list = Get-AllBackups
-$last_full_backup = Find-LastFullBackup $file_list
+$file_list = Get-AllBackups $file_suffix
+$last_full_backup = Find-LastFullBackup $file_list $size_limit
 Remove-OldBackups $file_list $last_full_backup
